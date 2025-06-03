@@ -152,7 +152,9 @@ Class Reflection
         json = json & SerializeFieldsArray() & ","
         json = json & SerializeLookupsArray() & ","
         json = json & SerializeTable() & ","
-        json = json & SerializeJoinsArray()
+        json = json & SerializeService() & ","
+        json = json & SerializeJoinsArray() & ","
+        json = json & SerializeInjectsArray()
 
         json = json & "}"
 
@@ -220,6 +222,34 @@ Class Reflection
         result = Right(result, Len(result) - 1)
 
         SerializeMethodsArray = result
+        Set json = Nothing
+    End Function
+
+    '------------------------------------------------------------
+    ' @function SerializeInjectsArray
+    ' @description Serializa o array de joins para JSON.
+    ' @returns {String} JSON gerado
+    '------------------------------------------------------------
+    Private Function SerializeInjectsArray()
+        Set json = New aspJSON
+        With json.data
+            .Add "Injects", json.Collection()
+
+            With json.data("Injects")
+                For i = 0 To Me.Injects.Count - 1
+                    .Add CStr(i), json.Collection()
+                    With .item(CStr(i))
+                        .Add "interface", Me.Injects(i).interface
+                    End With
+                Next
+            End With    
+        End With
+
+        result = json.JSONoutput()
+        result = Left(result, Len(result) - 1)
+        result = Right(result, Len(result) - 1)
+
+        SerializeInjectsArray = result
         Set json = Nothing
     End Function
 
@@ -321,6 +351,34 @@ Class Reflection
     End Function
 
     '------------------------------------------------------------
+    ' @function SerializeService
+    ' @description Serializa o objeto service para JSON.
+    ' @returns {String} JSON gerado
+    '------------------------------------------------------------
+    Private Function SerializeService()
+        Set json = New aspJSON
+        With json.data
+            .Add "Service", json.Collection()
+            If IsNull(Service) Then
+                With .item("Service")
+                    .Add "interface", Null
+                End With
+            Else
+                With .item("Service")
+                    .Add "interface", Me.Service.interface
+                End With
+            End If
+        End With
+
+        result = json.JSONoutput()
+        result = Left(result, Len(result) - 1)
+        result = Right(result, Len(result) - 1)
+
+        SerializeService = result
+        Set json = Nothing
+    End Function
+
+    '------------------------------------------------------------
     ' @function SerializeTable
     ' @description Serializa o objeto table para JSON.
     ' @returns {String} JSON gerado
@@ -328,14 +386,20 @@ Class Reflection
     Private Function SerializeTable()
         Set json = New aspJSON
 
-        With json.data
-            .Add "Table", json.Collection()
-            With .item("Table")
-                .Add "value", Me.Table.value
-                .Add "alias", Me.Table.alias
+        If IsNull(Table) Then
+            With json.data
+                .Add "Table", Null
             End With
-        End With
-
+        Else
+            With json.data
+                .Add "Table", json.Collection()
+                    With .item("Table")
+                        .Add "value", Me.Table.value
+                        .Add "alias", Me.Table.alias
+                    End With
+            End With
+        End If
+        
         result = json.JSONoutput()
         result = Left(result, Len(result) - 1)
         result = Right(result, Len(result) - 1)
@@ -383,16 +447,29 @@ Class Reflection
         ClassName = p_oJSON.data("ClassName")
         
         ' Table
-        Dim vTable : Set vTable = New TableAnnotation
-        vTable.value = p_oJSON.data("Table")("value")
-        vtable.alias = p_oJSON.data("Table")("alias")
-        Set Table = vTable
-        Set vTable = Nothing
+        If Not IsNull(p_oJSON.data("Table")) Then
+            Dim vTable : Set vTable = New TableAnnotation
+            vTable.value = p_oJSON.data("Table")("value")
+            vtable.alias = p_oJSON.data("Table")("alias")
+            Set Table = vTable
+            Set vTable = Nothing
+        End If
+
+        ' Service
+        value = p_oJSON.data("Service")("interface")
+        If Not IsNull(value) Then
+            Dim vService : Set vService = New ServiceAnnotation
+            vService.interface = value
+            Set Service = vService
+            Set vService = Nothing
+        End If
 
         ' Attributes
-        For i = 0 To p_oJSON.data("Attributes").Count
-            Attributes.Add p_oJSON.data("Attributes")(i)
-        Next
+        If Not p_oJSON.data("Attributes").Count = 0 Then
+            For i = 0 To p_oJSON.data("Attributes").Count
+                Attributes.Add p_oJSON.data("Attributes")(i)
+            Next
+        End If
 
         ' Methods
         Dim vMethod
@@ -403,43 +480,60 @@ Class Reflection
             Methods.Add vMethod
             Set vMethod = Nothing 
         Next
-
+        
         ' Joins
-        Dim vJoin
-        For i = 0 To p_oJSON.data("Joins").Count - 1
-            Set vJoin = New JoinAnnotation
-            vJoin.value = p_oJSON.data("Joins")(CStr(i))("value")
-            vJoin.alias = p_oJSON.data("Joins")(CStr(i))("alias")
-            vJoin.onConditition = Replace(p_oJSON.data("Joins")(CStr(i))("onConditition"), "\n", " ")
-            vJoin.joinType = p_oJSON.data("Joins")(CStr(i))("joinType")
-            Joins.Add vJoin
-            Set vJoin = Nothing
-        Next
+        If p_oJSON.data("Joins").Count - 1 > 0 Then
+            Dim vJoin
+            For i = 0 To p_oJSON.data("Joins").Count - 1
+                Set vJoin = New JoinAnnotation
+                vJoin.value = p_oJSON.data("Joins")(CStr(i))("value")
+                vJoin.alias = p_oJSON.data("Joins")(CStr(i))("alias")
+                vJoin.onConditition = Replace(p_oJSON.data("Joins")(CStr(i))("onConditition"), "\n", " ")
+                vJoin.joinType = p_oJSON.data("Joins")(CStr(i))("joinType")
+                Joins.Add vJoin
+                Set vJoin = Nothing
+            Next
+        End If 
 
         ' Fields
-        Dim vField
-        For i = 0 To p_oJSON.data("Fields").Count - 1
-            Set vField = New FieldAnnotation
-            vField.column = p_oJSON.data("Fields")(CStr(i))("column")
-            vField.alias = p_oJSON.data("Fields")(CStr(i))("alias")
-            vField.isPrimaryKey = p_oJSON.data("Fields")(CStr(i))("isPrimaryKey")
-            vField.enableInsertPrimaryKey = p_oJSON.data("Fields")(CStr(i))("enableInsertPrimaryKey")
-            vField.matchMode = p_oJSON.data("Fields")(CStr(i))("matchMode")
-            Fields.Add vField
-            Set vField = Nothing
-        Next
+        If p_oJSON.data("Fields").Count - 1 > 0 Then
+            Dim vField
+            For i = 0 To p_oJSON.data("Fields").Count - 1
+                Set vField = New FieldAnnotation
+                vField.column = p_oJSON.data("Fields")(CStr(i))("column")
+                vField.alias = p_oJSON.data("Fields")(CStr(i))("alias")
+                vField.isPrimaryKey = p_oJSON.data("Fields")(CStr(i))("isPrimaryKey")
+                vField.enableInsertPrimaryKey = p_oJSON.data("Fields")(CStr(i))("enableInsertPrimaryKey")
+                vField.matchMode = p_oJSON.data("Fields")(CStr(i))("matchMode")
+                Fields.Add vField
+                Set vField = Nothing
+            Next
+        End If
+
+        ' Injects
+        If p_oJSON.data("Injects").Count - 1 > 0 Then
+            Dim vInject
+            For i = 0 To p_oJSON.data("FieInjectslds").Count - 1
+                Set vInject = New InjectAnnotation
+                vInject.interface = p_oJSON.data("Injects")(CStr(i))("interface")
+                Injects.Add vInject
+                Set vInject = Nothing
+            Next
+        End If
 
         ' Lookups
-        Dim vLookup
-        For i = 0 To p_oJSON.data("Lookups").Count - 1
-            Set vLookup = New LookupAnnotation
-            vLookup.column = p_oJSON.data("Lookups")(CStr(i))("column")
-            vLookup.alias = p_oJSON.data("Lookups")(CStr(i))("alias")
-            vLookup.columnAlias = p_oJSON.data("Lookups")(CStr(i))("columnAlias")
-            vLookup.matchMode = p_oJSON.data("Lookups")(CStr(i))("matchMode")
-            Lookups.Add vLookup
-            Set vLookup = Nothing
-        Next
+        If p_oJSON.data("Lookups").Count - 1 > 0 Then
+            Dim vLookup
+            For i = 0 To p_oJSON.data("Lookups").Count - 1
+                Set vLookup = New LookupAnnotation
+                vLookup.column = p_oJSON.data("Lookups")(CStr(i))("column")
+                vLookup.alias = p_oJSON.data("Lookups")(CStr(i))("alias")
+                vLookup.columnAlias = p_oJSON.data("Lookups")(CStr(i))("columnAlias")
+                vLookup.matchMode = p_oJSON.data("Lookups")(CStr(i))("matchMode")
+                Lookups.Add vLookup
+                Set vLookup = Nothing
+            Next
+        End If
     End Function
 
     '------------------------------------------------------------

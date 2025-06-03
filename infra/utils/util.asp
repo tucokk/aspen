@@ -11,7 +11,7 @@ End Function
 
 ' @author: tucokk
 Public Function IsLocalhost()
-	IsLocalhost = true
+	IsLocalhost = false
 	' IsLocalhost = InStr(Request.ServerVariables("SERVER_NAME"), "localhost") > 0
 End Function
 

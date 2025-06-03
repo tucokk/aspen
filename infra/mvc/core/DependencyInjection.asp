@@ -47,15 +47,18 @@ Class DependencyInjection
         Set fso = Server.CreateObject("Scripting.FileSystemObject")
         Set folder = fso.GetFolder(path)
         For Each file in folder.Files
-            parts = Split(file, "\")
-            filePath = Format("/{0}/{1}/{2}", Array(parts(UBound(parts) - 2), parts(UBound(parts) - 1), parts(UBound(parts))))
-           
-            Set mirror = New Reflection
-            mirror.Reflect(filePath)   
+            If InStr(file, "index") Then  
+            Else
+                parts = Split(file, "\")
+                filePath = Format("/{0}/{1}/{2}", Array(parts(UBound(parts) - 2), parts(UBound(parts) - 1), parts(UBound(parts))))
             
-            If Not IsNull(mirror.Service) Then
-                strCommand = Format("{0}={1}", Array(mirror.Service.interface, mirror.ClassName))
-                WriteToFile ".aspen/.di/di.properties", strCommand
+                Set mirror = New Reflection
+                mirror.Reflect(filePath)   
+                
+                If Not IsNull(mirror.Service) Then
+                    strCommand = Format("{0}={1}", Array(mirror.Service.interface, mirror.ClassName))
+                    WriteToFile ".aspen/.di/di.properties", strCommand
+                End If
             End If
         Next
     End Sub

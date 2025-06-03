@@ -8,19 +8,12 @@ Const CLASSNAME = "HomeController"
 ' @author: tucokk
 Class HomeController
     
-    ' @Inject(interface="IHomeService")
-    Public IHomeService
     ' @Inject(interface="ITestService")
     Public ITestService
 
     Public Sub Index()
         Set teste = ITestService.FindAluno()
         response.write teste.nome
-        test()
-    End Sub
-
-    Public Sub Test()
-        IHomeService.teste()
     End Sub
 End Class
 
