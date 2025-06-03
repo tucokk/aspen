@@ -1,0 +1,5 @@
+<script language="VBScript"> runat="server"> 
+    Sub Session_OnStart
+        Session.Timeout=900
+    End Sub
+</script>
