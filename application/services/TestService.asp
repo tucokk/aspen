@@ -1,5 +1,3 @@
-<!--#include virtual="/infra/mvc/mvc-dependency-injection-only.asp"-->
-
 <%
 
 ' @author: tucokk

@@ -11,8 +11,6 @@ Class MvcEngine
         p_classPath = Trim(classPath)
     
         Call RunMvcClass()
-        Call CallActions()
-        Call TerminateSingletons()
     End Sub
 
     Public Sub RenderView(viewPath, viewBag)
@@ -48,6 +46,8 @@ Class MvcEngine
 
     Private Function RunMvcClass()
         Call InjectDependencies()
+        Call CallActions()
+        Call TerminateSingletons()
     End Function
 
     Private Sub InjectDependencies()
