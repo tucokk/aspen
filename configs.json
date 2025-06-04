@@ -1,7 +1,0 @@
-{
-    "name": "ASPEN",
-    "version": "0.0.1",
-    "environment": {
-        "enableReflectionCache": true
-    }
-}
