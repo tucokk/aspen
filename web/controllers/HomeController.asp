@@ -10,7 +10,7 @@ Class HomeController
 
     Public Sub Index()
         Set vAluno = ITestService.FindAluno()
-        debug vALuno.nome
+        SINGLETONS("MVC").RenderView "home/index", vAluno
     End Sub
 End Class
 
