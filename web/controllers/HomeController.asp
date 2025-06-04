@@ -1,4 +1,4 @@
-<!--#include virtual="/infra/mvc/mvc-dependencies-initialize.asp"-->
+<!--#include virtual="/infra/mvc/mvc-dependencies.asp"-->
 
 <%
 
@@ -10,13 +10,13 @@ Class HomeController
 
     Public Sub Index()
         Set vAluno = ITestService.FindAluno()
-        Engine.RenderView "home/index", vAluno
+        debug vALuno.nome
     End Sub
 End Class
 
 Const FILE_PATH = "/web/controllers/HomeController.asp"
 Const CLASSNAME = "HomeController"
 
-%>
+SINGLETONS("MVC").Resolve FILE_PATH, CLASSNAME
 
-<!--#include virtual="/infra/mvc/mvc-dependencies-terminate.asp"-->
+%>

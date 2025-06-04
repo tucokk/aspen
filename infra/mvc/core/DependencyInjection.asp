@@ -17,16 +17,25 @@ Class DependencyInjection
     End Sub
 
     Public Function GetInjectedServices(classPath)
-        Set services = Server.CreateObject("Scripting.Dictionary")
+        Set res = Server.CreateObject("Scripting.Dictionary")
         p_Mirror.Reflect(classPath)
 
         If p_Mirror.Injects.Count > 0 Then
-            For Each injection In p_Mirror.Injects
-                services.Add injection.interface, GetServiceByInterface(injection.interface)
+            Set services = Server.CreateObject("System.Collections.ArrayList")
+            strLog = Format("Injecting dependencies: {0}", classPath)
+
+            For Each injection In p_mirror.Injects
+                service = GetServiceByInterface(injection.interface)
+                strLog = strLog & chr(13) & AddTabIndent(Format("-> Injecting dependency [{0} -> {1}]", Array(injection.interface, service)), 16)
+                strCommand = Format("Set p_Instance.{0} = New {1}", Array(injection.interface, service))
+                services.Add strCommand
             Next
+
+            res.Add "services", services
+            res.Add "log", strLog
         End If
 
-        Set GetInjectedServices = services 
+        Set GetInjectedServices = res
     End Function
 
     Public Function GetServiceByInterface(interface)
@@ -51,7 +60,7 @@ Class DependencyInjection
             Else
                 parts = Split(file, "\")
                 filePath = Format("/{0}/{1}/{2}", Array(parts(UBound(parts) - 2), parts(UBound(parts) - 1), parts(UBound(parts))))
-            
+
                 Set mirror = New Reflection
                 mirror.Reflect(filePath)   
                 

@@ -562,7 +562,7 @@ Class Reflection
     Private Function ManageMethod(line)
         Dim vMethod
         
-        If InStr(line, "Sub") Then    
+        If InStr(line, "Sub ") And Not InStr(line, "End") Then    
             parts = Split(Trim(line), " ")
             index = Iif(InStr(line, "Public") Or InStr(line, "Private"), 2, 1)      
 
@@ -576,7 +576,7 @@ Class Reflection
             Exit Function
         End If
 
-        If InStr(line, "Function") Then
+        If InStr(line, "Function ") And Not InStr(line, "End") Then
             parts = Split(Trim(line), " ")
             index = Iif(InStr(line, "Public") Or InStr(line, "Private"), 2, 1)      
 
