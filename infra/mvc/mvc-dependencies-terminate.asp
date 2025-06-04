@@ -2,6 +2,14 @@
 
 Set instance = MvcCreateController(className, path)
 
+Public Sub SingletonsTerminate()
+    Set App = Nothing
+    Set Manager = Nothing
+    Set DI = Nothing
+    Set Engine = Nothing
+    Set instance = Nothing
+End Sub
+
 Public Sub MvcRunClass(className, path, action)
     Call MvcInjectDependencies(instance, path)
 
@@ -12,13 +20,6 @@ Public Sub MvcRunClass(className, path, action)
     Call SingletonsTerminate()
 End Sub
 
-Public Sub SingletonsTerminate()
-    Set App = Nothing
-    Set Manager = Nothing
-    Set DI = Nothing
-    Set instance = Nothing
-End Sub
-
 Public Function MvcCreateController(className, path)
     Dim strCommand
     strCommand = "Set temp = New " & className
@@ -27,7 +28,7 @@ Public Function MvcCreateController(className, path)
 End Function
 
 Public Sub MvcInjectDependencies(instance, path)
-    strLog = Format("Reflecting and injecting dependencies: {0}", path)
+    strLog = Format("Injecting dependencies: {0}", path)
     Set injections = DI.GetInjectedServices(path)
     For Each interface In injections.Keys
         strLog = strLog & chr(13) & AddTabIndent(Format("-> Injecting dependency [{0} -> {1}]", Array(interface, injections(interface))), 20)

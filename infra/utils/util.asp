@@ -15,4 +15,8 @@ Public Function IsLocalhost()
 	' IsLocalhost = InStr(Request.ServerVariables("SERVER_NAME"), "localhost") > 0
 End Function
 
+Public Function GetLink(controller, action)
+    GetLink = Format("index.asp?controller={0}&action={1}", Array(controller, action))
+End Function
+
 %>

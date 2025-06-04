@@ -2,20 +2,20 @@
 
 <%
 
-Const FILE_PATH = "/web/controllers/HomeController.asp"
-Const CLASSNAME = "HomeController"
-
 ' @author: tucokk
-Class HomeController
-    
+Class HomeController 
+
     ' @Inject(interface="ITestService")
     Public ITestService
 
     Public Sub Index()
-        Set teste = ITestService.FindAluno()
-        response.write teste.nome
+        Set vAluno = ITestService.FindAluno()
+        Engine.RenderView "home/index", vAluno
     End Sub
 End Class
+
+Const FILE_PATH = "/web/controllers/HomeController.asp"
+Const CLASSNAME = "HomeController"
 
 %>
 

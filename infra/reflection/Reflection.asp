@@ -225,31 +225,22 @@ Class Reflection
         Set json = Nothing
     End Function
 
-    '------------------------------------------------------------
-    ' @function SerializeInjectsArray
-    ' @description Serializa o array de joins para JSON.
-    ' @returns {String} JSON gerado
-    '------------------------------------------------------------
     Private Function SerializeInjectsArray()
         Set json = New aspJSON
-        With json.data
-            .Add "Injects", json.Collection()
+        
+        json.data.Add "Injects", json.Collection()
+        Set injectsArray = json.data.Item("Injects")
 
-            With json.data("Injects")
-                For i = 0 To Me.Injects.Count - 1
-                    .Add CStr(i), json.Collection()
-                    With .item(CStr(i))
-                        .Add "interface", Me.Injects(i).interface
-                    End With
-                Next
-            End With    
-        End With
+        For i = 0 To Me.Injects.Count - 1
+            injectsArray.Add i, Me.Injects(i).interface
+        Next
 
         result = json.JSONoutput()
         result = Left(result, Len(result) - 1)
         result = Right(result, Len(result) - 1)
 
         SerializeInjectsArray = result
+        Set injectsArray = Nothing
         Set json = Nothing
     End Function
 
@@ -511,11 +502,10 @@ Class Reflection
         End If
 
         ' Injects
-        If p_oJSON.data("Injects").Count - 1 > 0 Then
-            Dim vInject
-            For i = 0 To p_oJSON.data("FieInjectslds").Count - 1
+        If Not p_oJSON.data("Injects").Count = 0 Then
+            For i = 0 To p_oJSON.data("Injects").Count - 1
                 Set vInject = New InjectAnnotation
-                vInject.interface = p_oJSON.data("Injects")(CStr(i))("interface")
+                vInject.interface = p_oJSON.data("Injects")(i)
                 Injects.Add vInject
                 Set vInject = Nothing
             Next

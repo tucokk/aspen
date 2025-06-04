@@ -34,7 +34,7 @@ Class Connection
         If p_dbConnection Is Nothing Then
             ' Log "(ID Usuário: " & Session("id_usuario") & ") - Obtendo conexão do pool: " & Application("conMSSQL_ConnectionString") & ";Pooling=true;", "Infra.Persistence.Db.Connection"
             Set p_dbConnection = Server.CreateObject("ADODB.Connection")
-            p_dbConnection.ConnectionString = ""
+            p_dbConnection.ConnectionString = "Provider=SQLOLEDB.1;Persist Security Info=False;User ID=sa;Password='xpto2039SW@';Initial Catalog=bkp_insech;Data Source=SERVIDOR_DADOS; Pooling=true;"'Application("conMSSQL_ConnectionString")
             p_dbConnection.Open
         End If
     End Function
